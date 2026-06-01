@@ -1,4 +1,4 @@
-package com.volodya262.telegram.honda_manual_bot.ai;
+package com.volodya262.telegram.honda_manual_bot.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

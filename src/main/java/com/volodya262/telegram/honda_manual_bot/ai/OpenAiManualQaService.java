@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volodya262.telegram.honda_manual_bot.config.OpenAiProperties;
+import com.volodya262.telegram.honda_manual_bot.domain.DetectedUserLanguage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -35,16 +36,16 @@ public class OpenAiManualQaService {
     public OpenAiAskResult askManual(String userQuestion) {
         final var request = OpenAiRequestFactory.from(properties.model(), properties.vectorStoreId(), userQuestion);
 
-        String response = restClient.post()
+        final var rawResponse = restClient.post()
                 .uri("/responses")
                 .body(request)
                 .retrieve()
                 .body(String.class);
 
-        return extractResult(response);
+        return toOpenAiAskResult(rawResponse);
     }
 
-    OpenAiAskResult extractResult(String rawResponse) {
+    OpenAiAskResult toOpenAiAskResult(String rawResponse) {
         JsonNode response = readResponse(rawResponse);
 
         if (response == null) {

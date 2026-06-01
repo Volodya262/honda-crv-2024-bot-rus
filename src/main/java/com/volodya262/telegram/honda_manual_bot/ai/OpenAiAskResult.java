@@ -1,5 +1,7 @@
 package com.volodya262.telegram.honda_manual_bot.ai;
 
+import com.volodya262.telegram.honda_manual_bot.domain.DetectedUserLanguage;
+
 import java.util.List;
 
 public record OpenAiAskResult(

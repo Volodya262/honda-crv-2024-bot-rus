@@ -1,6 +1,6 @@
 package com.volodya262.telegram.honda_manual_bot.realapi;
 
-import com.volodya262.telegram.honda_manual_bot.ai.DetectedUserLanguage;
+import com.volodya262.telegram.honda_manual_bot.domain.DetectedUserLanguage;
 import com.volodya262.telegram.honda_manual_bot.ai.OpenAiAskResult;
 import com.volodya262.telegram.honda_manual_bot.ai.OpenAiManualQaService;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
 package com.volodya262.telegram.honda_manual_bot.ai;
 
 import com.volodya262.telegram.honda_manual_bot.config.OpenAiProperties;
+import com.volodya262.telegram.honda_manual_bot.domain.DetectedUserLanguage;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 
@@ -18,8 +19,8 @@ class OpenAiManualQaServiceTest {
     );
 
     @Test
-    void extractResultReturnsSendableErrorWhenResponseIsEmpty() {
-        OpenAiAskResult result = service.extractResult(null);
+    void toOpenAiAskResultReturnsSendableErrorWhenResponseIsEmpty() {
+        OpenAiAskResult result = service.toOpenAiAskResult(null);
 
         assertFalse(result.isSuccess());
         assertEquals(DetectedUserLanguage.UNKNOWN, result.detectedUserLanguage());
@@ -29,8 +30,8 @@ class OpenAiManualQaServiceTest {
     }
 
     @Test
-    void extractResultReturnsSendableErrorWhenStructuredTextIsMissing() {
-        OpenAiAskResult result = service.extractResult("""
+    void toOpenAiAskResultReturnsSendableErrorWhenStructuredTextIsMissing() {
+        OpenAiAskResult result = service.toOpenAiAskResult("""
                 {
                   "output": [
                     {
