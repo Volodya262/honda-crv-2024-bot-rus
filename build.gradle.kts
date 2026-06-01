@@ -19,18 +19,25 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	implementation("org.springframework.boot:spring-boot-starter-flyway")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.flywaydb:flyway-database-postgresql")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.springframework.boot:spring-boot-starter-restclient")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+//	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+//	implementation("org.springframework.boot:spring-boot-starter-flyway")
+//	implementation("org.springframework.boot:spring-boot-starter-validation")
+//	implementation("org.flywaydb:flyway-database-postgresql")
+//	runtimeOnly("org.postgresql:postgresql")
+
+	implementation("org.telegram:telegrambots-springboot-longpolling-starter:9.6.0")
+	implementation("org.telegram:telegrambots-client:9.6.0")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
-	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.wiremock:wiremock-standalone:3.13.2")
+//	testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
+//	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
+//	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
+//	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-	testImplementation("org.testcontainers:testcontainers-postgresql")
+//	testImplementation("org.testcontainers:testcontainers-postgresql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
