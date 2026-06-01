@@ -14,7 +14,6 @@ import java.util.List;
 @Service
 public class OpenAiManualQaService {
 
-    private static final String UNKNOWN_LANGUAGE = "Unknown";
     private static final String DEFAULT_ERROR_TEXT = "I could not find an answer.";
 
     private final OpenAiProperties properties;
@@ -49,7 +48,8 @@ public class OpenAiManualQaService {
         JsonNode response = readResponse(rawResponse);
 
         if (response == null) {
-            return fallbackResult(
+            return OpenAiAskResult.errorWithHumanReadable(
+                    DetectedUserLanguage.UNKNOWN,
                     "OpenAI returned an empty response.",
                     "OpenAI returned an empty response."
             );
@@ -57,32 +57,24 @@ public class OpenAiManualQaService {
 
         JsonNode output = response.path("output");
         if (!output.isArray()) {
-            return fallbackResult(
+            return OpenAiAskResult.errorWithHumanReadable(
+                    DetectedUserLanguage.UNKNOWN,
                     "Could not parse OpenAI response: missing output array.",
                     "Could not parse OpenAI response."
             );
         }
 
-        for (JsonNode outputItem : output) {
-            JsonNode content = outputItem.path("content");
+        String structuredText = findStructuredText(output);
 
-            if (!content.isArray()) {
-                continue;
-            }
-
-            for (JsonNode contentItem : content) {
-                JsonNode text = contentItem.path("text");
-
-                if (text.isTextual()) {
-                    return readAskResult(text.asText());
-                }
-            }
+        if (structuredText == null) {
+            return OpenAiAskResult.errorWithHumanReadable(
+                    DetectedUserLanguage.UNKNOWN,
+                    "Could not parse OpenAI response: missing structured output text.",
+                    DEFAULT_ERROR_TEXT
+            );
         }
 
-        return fallbackResult(
-                "Could not parse OpenAI response: missing structured output text.",
-                DEFAULT_ERROR_TEXT
-        );
+        return readAskResult(structuredText);
     }
 
     private JsonNode readResponse(String rawResponse) {
@@ -97,13 +89,41 @@ public class OpenAiManualQaService {
         }
     }
 
+    private String findStructuredText(JsonNode output) {
+        for (JsonNode outputItem : output) {
+            String text = findTextInContent(outputItem.path("content"));
+
+            if (text != null) {
+                return text;
+            }
+        }
+
+        return null;
+    }
+
+    private String findTextInContent(JsonNode content) {
+        if (!content.isArray()) {
+            return null;
+        }
+
+        for (JsonNode contentItem : content) {
+            JsonNode text = contentItem.path("text");
+
+            if (text.isTextual()) {
+                return text.asText();
+            }
+        }
+
+        return null;
+    }
+
     private OpenAiAskResult readAskResult(String rawText) {
         try {
             OpenAiAskResult result = objectMapper.readValue(rawText, OpenAiAskResult.class);
-            String detectedUserLanguage = getOrDefault(result.detectedUserLanguage());
+            DetectedUserLanguage detectedUserLanguage = getOrDefault(result.detectedUserLanguage());
 
             if (!result.isSuccess()) {
-                return fallbackResult(
+                return OpenAiAskResult.errorWithHumanReadable(
                         detectedUserLanguage,
                         getOrDefault(result.errorMessageToLog(), "OpenAI returned an unsuccessful result."),
                         getOrDefault(result.errorMessageHumanReadable(), "I could not find an answer.")
@@ -111,7 +131,11 @@ public class OpenAiManualQaService {
             }
 
             if (result.text() == null || result.text().isBlank()) {
-                return fallbackResult(detectedUserLanguage, "OpenAI returned an empty answer text.", DEFAULT_ERROR_TEXT);
+                return OpenAiAskResult.errorWithHumanReadable(
+                        detectedUserLanguage,
+                        "OpenAI returned an empty answer text.",
+                        DEFAULT_ERROR_TEXT
+                );
             }
 
             return OpenAiAskResult.success(
@@ -125,32 +149,12 @@ public class OpenAiManualQaService {
         }
     }
 
-    private String getOrDefault(String detectedUserLanguage) {
-        if (detectedUserLanguage == null || detectedUserLanguage.isBlank()) {
-            return UNKNOWN_LANGUAGE;
+    private DetectedUserLanguage getOrDefault(DetectedUserLanguage detectedUserLanguage) {
+        if (detectedUserLanguage == null) {
+            return DetectedUserLanguage.UNKNOWN;
         }
 
         return detectedUserLanguage;
-    }
-
-    private OpenAiAskResult fallbackResult(String errorMessageToLog, String errorMessageHumanReadable) {
-        return fallbackResult(UNKNOWN_LANGUAGE, errorMessageToLog, errorMessageHumanReadable);
-    }
-
-    private OpenAiAskResult fallbackResult(
-            String detectedUserLanguage,
-            String errorMessageToLog,
-            String errorMessageHumanReadable
-    ) {
-        return new OpenAiAskResult(
-                errorMessageHumanReadable,
-                detectedUserLanguage,
-                List.of(),
-                List.of(),
-                false,
-                errorMessageToLog,
-                errorMessageHumanReadable
-        );
     }
 
     private <T> List<T> getOrEmptyList(List<T> values) {

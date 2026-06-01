@@ -7,13 +7,16 @@ public class OpenAiRequestFactory {
     public final static String prompt = """
                                         Your task is to answer the user's question about the Honda CR-V 2024.
                                         Only answer questions that are directly related to the Honda CR-V 2024, its manual, operation, maintenance, features, warnings, troubleshooting, or ownership.
+                                        A request is out of scope when Honda CR-V is only incidental context, such as a location where the user wants to do an unrelated task.
                                         If the user asks for anything outside that scope, do not answer the unrelated request.
                                         For out-of-scope requests, politely say in the user's language that you can only help with questions about the Honda CR-V 2024, set isSuccess to false, use an empty text if appropriate, provide a human-readable error message, and leave source arrays empty.
                                         Use the Honda Manual available through file_search as the primary source of information.
                                         If you cannot find the answer in the Honda Manual, answer using web search.
+                                        If the answer is found in the Honda Manual, do not use web search and keep sourcesManualLinks empty.
                                         If you cannot find reliable information in either source, say that you could not find the answer.
                                         Do not make up facts.
                                         Answer in the same language as the user.
+                                        Set detectedUserLanguage to the user's language ISO code: en, ru, or unknown.
                                         Reply with a single message and do not invite the user to continue the conversation.
                                         Include the source of the information in the answer.
                                         When the answer is based on the Honda Manual, mention the exact manual page directly in the text.
@@ -61,7 +64,8 @@ public class OpenAiRequestFactory {
                                                 ),
                                                 "detectedUserLanguage", Map.of(
                                                         "type", "string",
-                                                        "description", "The detected language of the user's question, written as an English language name."
+                                                        "description", "The detected language of the user's question as an ISO code. Use en for English, ru for Russian, or unknown when unsure.",
+                                                        "enum", List.of("en", "ru", "unknown")
                                                 ),
                                                 "sourcesManualPagesIndexesAsPrinted", Map.of(
                                                         "type", "array",

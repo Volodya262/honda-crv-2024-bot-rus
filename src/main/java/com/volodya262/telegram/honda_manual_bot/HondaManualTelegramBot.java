@@ -1,6 +1,7 @@
 package com.volodya262.telegram.honda_manual_bot;
 
 import com.volodya262.telegram.honda_manual_bot.ai.OpenAiManualQaService;
+import com.volodya262.telegram.honda_manual_bot.ai.OpenAiAskResult;
 import com.volodya262.telegram.honda_manual_bot.config.TelegramBotProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public class HondaManualTelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(HondaManualTelegramBot.class);
+    private static final String DEFAULT_ERROR_MESSAGE = "Sorry, I could not prepare an answer.";
 
     private final TelegramBotProperties properties;
     private final TelegramClient telegramClient;
@@ -56,11 +58,11 @@ public class HondaManualTelegramBot implements SpringLongPollingBot, LongPolling
 
         final var openAiResponse = openAiManualQaService.askManual(text);
 
-        log.info("OpenAI response success. [chatId: {}, userMessage: {}, openAiResponse: {}]", chatId, text, openAiResponse);
+        log.info("OpenAI response received. [chatId: {}, userMessage: {}, openAiResponse: {}]", chatId, text, openAiResponse);
 
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
-                .text(openAiResponse.text())
+                .text(responseText(openAiResponse))
                 .build();
 
         try {
@@ -68,5 +70,17 @@ public class HondaManualTelegramBot implements SpringLongPollingBot, LongPolling
         } catch (TelegramApiException e) {
             log.error("Failed to send Telegram message", e);
         }
+    }
+
+    private String responseText(OpenAiAskResult openAiResponse) {
+        if (openAiResponse.isSuccess()) {
+            return openAiResponse.text();
+        }
+
+        if (openAiResponse.errorMessageHumanReadable() != null && !openAiResponse.errorMessageHumanReadable().isBlank()) {
+            return openAiResponse.errorMessageHumanReadable();
+        }
+
+        return DEFAULT_ERROR_MESSAGE;
     }
 }

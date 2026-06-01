@@ -1,4 +1,4 @@
-package com.volodya262.telegram.honda_manual_bot;
+package com.volodya262.telegram.honda_manual_bot.realapi;
 
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;

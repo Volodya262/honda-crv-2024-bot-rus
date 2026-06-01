@@ -7,6 +7,7 @@ import org.springframework.web.client.RestClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OpenAiManualQaServiceTest {
@@ -21,11 +22,10 @@ class OpenAiManualQaServiceTest {
         OpenAiAskResult result = service.extractResult(null);
 
         assertFalse(result.isSuccess());
-        assertEquals("Unknown", result.detectedUserLanguage());
-        assertNotNull(result.text());
-        assertFalse(result.text().isBlank());
+        assertEquals(DetectedUserLanguage.UNKNOWN, result.detectedUserLanguage());
+        assertNull(result.text());
         assertEquals("OpenAI returned an empty response.", result.errorMessageToLog());
-        assertEquals(result.text(), result.errorMessageHumanReadable());
+        assertEquals("OpenAI returned an empty response.", result.errorMessageHumanReadable());
     }
 
     @Test
@@ -41,9 +41,9 @@ class OpenAiManualQaServiceTest {
                 """);
 
         assertFalse(result.isSuccess());
-        assertNotNull(result.text());
-        assertFalse(result.text().isBlank());
+        assertNull(result.text());
         assertEquals("Could not parse OpenAI response: missing structured output text.", result.errorMessageToLog());
+        assertEquals("I could not find an answer.", result.errorMessageHumanReadable());
         assertTrue(result.sourcesManualPagesIndexesAsPrinted().isEmpty());
         assertTrue(result.sourcesManualLinks().isEmpty());
     }

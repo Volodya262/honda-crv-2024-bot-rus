@@ -4,7 +4,7 @@ import java.util.List;
 
 public record OpenAiAskResult(
         String text,
-        String detectedUserLanguage,
+        DetectedUserLanguage detectedUserLanguage,
         List<String> sourcesManualPagesIndexesAsPrinted,
         List<SourceManualLink> sourcesManualLinks,
         boolean isSuccess,
@@ -14,7 +14,7 @@ public record OpenAiAskResult(
 
     public static OpenAiAskResult success(
             String text,
-            String detectedUserLanguage,
+            DetectedUserLanguage detectedUserLanguage,
             List<String> sourcesManualPagesIndexesAsPrinted,
             List<SourceManualLink> sourcesManualLinks
     ) {
@@ -30,7 +30,7 @@ public record OpenAiAskResult(
     }
 
     public static OpenAiAskResult error(
-            String detectedUserLanguage,
+            DetectedUserLanguage detectedUserLanguage,
             String errorMessageToLog
     ) {
         return new OpenAiAskResult(
@@ -45,7 +45,7 @@ public record OpenAiAskResult(
     }
 
     public static OpenAiAskResult errorWithHumanReadable(
-            String detectedUserLanguage,
+            DetectedUserLanguage detectedUserLanguage,
             String errorMessageToLog,
             String errorMessageHumanReadable
     ) {
