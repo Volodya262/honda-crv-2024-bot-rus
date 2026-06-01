@@ -14,16 +14,16 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 @Component
-public class HelloTelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
+public class HondaManualTelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(HelloTelegramBot.class);
+    private static final Logger log = LoggerFactory.getLogger(HondaManualTelegramBot.class);
 
     private final TelegramBotProperties properties;
     private final TelegramClient telegramClient;
 
     private final OpenAiManualQaService openAiManualQaService;
 
-    public HelloTelegramBot(
+    public HondaManualTelegramBot(
             TelegramBotProperties properties,
             OpenAiManualQaService openAiManualQaService
     ) {
@@ -51,13 +51,15 @@ public class HelloTelegramBot implements SpringLongPollingBot, LongPollingSingle
         Long chatId = update.getMessage().getChatId();
         String text = update.getMessage().getText();
 
-        log.info("Received message from chat {}: {}", chatId, text);
+        log.info("Message from chat {}: {}", chatId, text);
 
         final var openAiResponse = openAiManualQaService.askManual(text);
 
+        log.info("OpenAI response success. [chatId: {}, userMessage: {}, openAiResponse: {}]", chatId, text, openAiResponse);
+
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
-                .text(openAiResponse)
+                .text(openAiResponse.text())
                 .build();
 
         try {
