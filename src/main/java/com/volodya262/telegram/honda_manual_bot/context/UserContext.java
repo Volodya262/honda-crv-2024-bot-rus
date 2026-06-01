@@ -24,6 +24,15 @@ public record UserContext(
         return Optional.empty();
     }
 
+    public List<ChatMessage> getLastMessages(int limit) {
+        if (limit < 0) {
+            throw new IllegalArgumentException("Limit must not be negative.");
+        }
+
+        int fromIndex = Math.max(messages.size() - limit, 0);
+        return messages.subList(fromIndex, messages.size());
+    }
+
     public record UserContextKey(
             Long chatId,
             Long userId

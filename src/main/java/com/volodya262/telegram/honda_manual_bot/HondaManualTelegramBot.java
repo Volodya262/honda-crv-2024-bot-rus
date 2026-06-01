@@ -29,6 +29,7 @@ public class HondaManualTelegramBot implements SpringLongPollingBot, LongPolling
     private static final Logger log = LoggerFactory.getLogger(HondaManualTelegramBot.class);
     private static final String DEFAULT_ERROR_MESSAGE = "Sorry, I could not prepare an answer.";
     private static final String RATE_LIMIT_EXCEEDED_MESSAGE = "Rate limit exceed";
+    private static final int OPEN_AI_CONTEXT_MESSAGES_LIMIT = 20;
 
     private final TelegramBotProperties properties;
     private final TelegramClient telegramClient;
@@ -71,7 +72,7 @@ public class HondaManualTelegramBot implements SpringLongPollingBot, LongPolling
 
         log.info("Message from chat {}: {}", chatId, text);
 
-        userContextService.addUserMessage(
+        final var userContext = userContextService.addUserMessage(
                 contextKey, userInfo, "telegram:%s".formatted(telegramMessage.getMessageId()), text, messageTimestamp(telegramMessage)
         );
 
@@ -81,11 +82,12 @@ public class HondaManualTelegramBot implements SpringLongPollingBot, LongPolling
             return;
         }
 
-        final var openAiResponse = openAiManualQaService.askManual(text); // передавай сюда user context аргументом
+        final var openAiResponse = openAiManualQaService.askManual(userContext.getLastMessages(OPEN_AI_CONTEXT_MESSAGES_LIMIT));
         log.info("OpenAI response received. [chatId: {}, userMessage: {}, openAiResponse: {}]", chatId, text, openAiResponse);
 
         final var messageForUser = buildMessageTextForUser(openAiResponse);
-        if (sendMessage(chatId, messageForUser)) {
+        final var isSendMessageSuccess = sendMessage(chatId, messageForUser);
+        if (isSendMessageSuccess) {
             userContextService.addAssistantMessage(contextKey, userInfo, messageForUser);
         }
     }

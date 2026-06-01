@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -131,5 +132,26 @@ class UserContextServiceTest {
         }
 
         assertTrue(service.checkRateLimits(key));
+    }
+
+    @Test
+    void getLastMessagesReturnsLimitedTail() {
+        UserContextKey key = new UserContextKey(123L, 456L);
+        UserInfo userInfo = new UserInfo(456L, "username", "First", "Last", DetectedUserLanguage.ENGLISH);
+        UserContext context = new UserContext(
+                key,
+                userInfo,
+                List.of(
+                        new ChatMessage("message-1", MessageRole.USER, "One", Instant.parse("2026-06-01T10:00:00Z")),
+                        new ChatMessage("message-2", MessageRole.ASSISTANT, "Two", Instant.parse("2026-06-01T10:00:01Z")),
+                        new ChatMessage("message-3", MessageRole.USER, "Three", Instant.parse("2026-06-01T10:00:02Z"))
+                )
+        );
+
+        List<ChatMessage> lastMessages = context.getLastMessages(2);
+
+        assertEquals(2, lastMessages.size());
+        assertEquals("message-2", lastMessages.getFirst().id());
+        assertEquals("message-3", lastMessages.getLast().id());
     }
 }

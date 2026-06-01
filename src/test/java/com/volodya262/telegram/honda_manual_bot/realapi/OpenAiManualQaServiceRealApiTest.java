@@ -3,10 +3,14 @@ package com.volodya262.telegram.honda_manual_bot.realapi;
 import com.volodya262.telegram.honda_manual_bot.domain.DetectedUserLanguage;
 import com.volodya262.telegram.honda_manual_bot.ai.OpenAiAskResult;
 import com.volodya262.telegram.honda_manual_bot.ai.OpenAiManualQaService;
+import com.volodya262.telegram.honda_manual_bot.context.ChatMessage;
+import com.volodya262.telegram.honda_manual_bot.context.MessageRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -25,7 +29,7 @@ class OpenAiManualQaServiceRealApiTest extends BaseRealApiTest {
     @Test
     void askManualReturnsEnglishParkingSensorAnswerFromRealApi() {
         OpenAiAskResult result = assertDoesNotThrow(
-                () -> openAiManualQaService.askManual("In my Honda CR-V 2024, the parking sensors keep beeping when I drive into my garage. How do I turn them off?")
+                () -> openAiManualQaService.askManual(userMessage("In my Honda CR-V 2024, the parking sensors keep beeping when I drive into my garage. How do I turn them off?"))
         );
 
         assertTrue(result.isSuccess());
@@ -44,7 +48,7 @@ class OpenAiManualQaServiceRealApiTest extends BaseRealApiTest {
     @Test
     void askManualReturnsRussianParkingSensorAnswerFromRealApi() {
         OpenAiAskResult result = assertDoesNotThrow(
-                () -> openAiManualQaService.askManual("Парктроники постоянно пищат когда я заезжаю в гараж. Как их отключить?")
+                () -> openAiManualQaService.askManual(userMessage("Парктроники постоянно пищат когда я заезжаю в гараж. Как их отключить?"))
         );
 
         assertTrue(result.isSuccess());
@@ -57,7 +61,7 @@ class OpenAiManualQaServiceRealApiTest extends BaseRealApiTest {
     @Test
     void askManualRejectsReactComponentRequestFromRealApi() {
         OpenAiAskResult result = assertDoesNotThrow(
-                () -> openAiManualQaService.askManual("Напиши пример react компонента")
+                () -> openAiManualQaService.askManual(userMessage("Напиши пример react компонента"))
         );
 
         assertFalse(result.isSuccess());
@@ -71,7 +75,7 @@ class OpenAiManualQaServiceRealApiTest extends BaseRealApiTest {
     @Test
     void askManualRejectsCookingRequestFromRealApi() {
         OpenAiAskResult result = assertDoesNotThrow(
-                () -> openAiManualQaService.askManual("Как приготовить блинчики с мясом, сидя в Honda CRV")
+                () -> openAiManualQaService.askManual(userMessage("Как приготовить блинчики с мясом, сидя в Honda CRV"))
         );
 
         assertFalse(result.isSuccess());
@@ -85,5 +89,9 @@ class OpenAiManualQaServiceRealApiTest extends BaseRealApiTest {
     private void assertNotBlank(String value) {
         assertNotNull(value);
         assertFalse(value.isBlank());
+    }
+
+    private List<ChatMessage> userMessage(String text) {
+        return List.of(new ChatMessage("test-user-message", MessageRole.USER, text, Instant.parse("2026-06-01T10:00:00Z")));
     }
 }

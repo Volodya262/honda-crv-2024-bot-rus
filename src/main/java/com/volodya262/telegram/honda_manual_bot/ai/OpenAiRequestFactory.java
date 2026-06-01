@@ -1,9 +1,18 @@
 package com.volodya262.telegram.honda_manual_bot.ai;
 
+import com.volodya262.telegram.honda_manual_bot.context.ChatMessage;
+import com.volodya262.telegram.honda_manual_bot.context.MessageRole;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OpenAiRequestFactory {
+    private static final int MAX_OUTPUT_TOKENS = 1200;
+    private static final int MAX_TOOL_CALLS = 2;
+
     public final static String prompt = """
                                         Your task is to answer the user's question about the Honda CR-V 2024.
                                         Only answer questions that are directly related to the Honda CR-V 2024, its manual, operation, maintenance, features, warnings, troubleshooting, or ownership.
@@ -28,29 +37,26 @@ public class OpenAiRequestFactory {
     public static Map<String, Object> from(
             String model,
             String vectorStoreId,
-            String userQuestion
+            List<ChatMessage> messages
     ) {
-        return Map.of(
-                "model", model,
-                "tools", List.of(
+        return Map.ofEntries(
+                Map.entry("model", model),
+                Map.entry("tools", List.of(
                         Map.of(
                                 "type", "file_search",
                                 "vector_store_ids", List.of(vectorStoreId)
                         ),
                         Map.of("type", "web_search")
-                ),
-                "input", List.of(
-                        Map.of(
-                                "role", "system",
-                                "content", OpenAiRequestFactory.prompt
-                        ),
-                        Map.of(
-                                "role", "user",
-                                "content", userQuestion
-                        )
-                ),
-                "temperature", 0,
-                "text", Map.of(
+                )),
+                Map.entry("input", input(messages)),
+                Map.entry("temperature", 0),
+                Map.entry("max_output_tokens", MAX_OUTPUT_TOKENS),
+                Map.entry("max_tool_calls", MAX_TOOL_CALLS),
+                Map.entry("tool_choice", "auto"),
+                Map.entry("parallel_tool_calls", false),
+                Map.entry("truncation", "auto"),
+                Map.entry("store", false),
+                Map.entry("text", Map.of(
                         "format", Map.of(
                                 "type", "json_schema",
                                 "name", "manual_answer",
@@ -116,7 +122,36 @@ public class OpenAiRequestFactory {
                                         "additionalProperties", false
                                 )
                         )
-                )
+                ))
         );
+    }
+
+    private static List<Map<String, String>> input(List<ChatMessage> messages) {
+        List<Map<String, String>> input = new ArrayList<>();
+        input.add(Map.of(
+                "role", "system",
+                "content", OpenAiRequestFactory.prompt
+        ));
+
+        input.addAll(messages.stream()
+                .filter(message -> message.text() != null && !message.text().isBlank())
+                .map(OpenAiRequestFactory::inputMessage)
+                .toList());
+
+        return input;
+    }
+
+    private static Map<String, String> inputMessage(ChatMessage message) {
+        return Stream.of(
+                Map.entry("role", role(message.role())),
+                Map.entry("content", message.text())
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static String role(MessageRole role) {
+        return switch (role) {
+            case USER -> "user";
+            case ASSISTANT -> "assistant";
+        };
     }
 }
