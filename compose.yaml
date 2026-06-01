@@ -1,0 +1,17 @@
+services:
+  bot:
+    build:
+      context: .
+    image: honda-crv-2024-bot-rus:local
+    env_file:
+      - .env
+    environment:
+      SERVER_PORT: 8080
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75 -XX:+UseContainerSupport}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
