@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OpenAiRequestFactoryTest {
 
@@ -51,5 +52,13 @@ class OpenAiRequestFactoryTest {
         assertEquals(false, request.get("parallel_tool_calls"));
         assertEquals("auto", request.get("truncation"));
         assertEquals(false, request.get("store"));
+    }
+
+    @Test
+    void promptPrioritizesChineseThenEnglishThenWeb() {
+        String prompt = OpenAiRequestFactory.prompt;
+
+        assertTrue(prompt.contains("prefer Honda CRV China manual.pdf first, then Honda CRV 2024 manual.pdf"));
+        assertTrue(prompt.contains("Use web search only when neither the Chinese manual nor the English manual"));
     }
 }

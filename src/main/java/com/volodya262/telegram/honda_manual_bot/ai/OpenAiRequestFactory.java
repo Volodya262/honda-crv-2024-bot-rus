@@ -14,13 +14,15 @@ public class OpenAiRequestFactory {
     private static final int MAX_TOOL_CALLS = 2;
 
     public final static String prompt = """
-                                        Your task is to answer the user's question about the Honda CR-V 2024.
-                                        Only answer questions that are directly related to the Honda CR-V 2024, its manual, operation, maintenance, features, warnings, troubleshooting, or ownership.
+                                        Your task is to answer the user's question about the Dongfeng Honda CR-V 6.
+                                        Only answer questions that are directly related to the Dongfeng Honda CR-V 6, its manual, operation, maintenance, features, warnings, troubleshooting, or ownership.
                                         A request is out of scope when Honda CR-V is only incidental context, such as a location where the user wants to do an unrelated task.
                                         If the user asks for anything outside that scope, do not answer the unrelated request.
-                                        For out-of-scope requests, politely say in the user's language that you can only help with questions about the Honda CR-V 2024, set isSuccess to false, use an empty text if appropriate, provide a human-readable error message, and leave source arrays empty.
-                                        Use the Honda Manual available through file_search as the primary source of information.
-                                        If you cannot find the answer in the Honda Manual, answer using web search.
+                                        For out-of-scope requests, politely say in the user's language that you can only help with questions about the Dongfeng Honda CR-V, set isSuccess to false, use an empty text if appropriate, provide a human-readable error message, and leave source arrays empty.
+                                        Use the Honda manuals available through file_search as the primary source of information.
+                                        When file_search returns relevant information from both manuals, prefer Honda CRV China manual.pdf first, then Honda CRV 2024 manual.pdf.
+                                        If the Chinese manual conflicts with the English manual, follow the Chinese manual.
+                                        Use web search only when neither the Chinese manual nor the English manual in file_search provides a reliable answer.
                                         If the answer is found in the Honda Manual, do not use web search and keep sourcesManualLinks empty.
                                         If you cannot find reliable information in either source, say that you could not find the answer.
                                         Do not make up facts.
