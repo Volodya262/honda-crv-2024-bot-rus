@@ -43,4 +43,5 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	systemProperty("runRealApiTests", System.getProperty("runRealApiTests") ?: "false")
 }

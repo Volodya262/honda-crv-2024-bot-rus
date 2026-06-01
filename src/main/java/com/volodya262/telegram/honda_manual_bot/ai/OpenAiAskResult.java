@@ -1,4 +1,4 @@
-package com.volodya262.telegram.honda_manual_bot;
+package com.volodya262.telegram.honda_manual_bot.ai;
 
 import java.util.List;
 

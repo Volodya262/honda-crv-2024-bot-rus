@@ -1,5 +1,6 @@
 package com.volodya262.telegram.honda_manual_bot;
 
+import com.volodya262.telegram.honda_manual_bot.ai.OpenAiManualQaService;
 import com.volodya262.telegram.honda_manual_bot.config.TelegramBotProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
